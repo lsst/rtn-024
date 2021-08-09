@@ -1,0 +1,9 @@
+% bibentry template for lsst.bib in https://github.com/lsst/lsst-texmf/blob/master/texmf/bibtex/bib/lsst.bib
+
+@DocuShare{RTN-024,
+   author = { Hsin-Fang Chiang },
+    title = {Routine HSC/DC2 Processing at SLAC as early demonstrator},
+     year = 2021,
+    month = Aug,
+   handle = {RTN-024},
+      url = {https://rtn-024.lsst.io } }
