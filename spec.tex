@@ -1,0 +1,88 @@
+\section{Specifications}
+
+\subsection{Raw data size}
+\begin{itemize}
+\item HSC-RC2: 432 exposures; about 3TB.
+\item DC2's test-med-1 dataset: 345 exposures; about 1TB.
+\item all DC2 run 2.2i is about 10 TB.
+\end{itemize}
+
+\subsection{Butler repository}
+A Postgres database will be used as the Butler Registry.
+The Butler datastore can be either an object store or a POSIX shared file system; the Butler datastore should be assessible from the exeuciton nodes.
+
+\subsection{CPU cycles to the processing}
+<1000 node-hours, old data https://confluence.lsstcorp.org/display/~sthrush/Node+Utilization+for++HSC-RC2+Reprocessing+Jobs
+
+More current data: how much CPU time was used for the more recent NCSA runs?
+
+\subsection{Medium-sized DRP workflow}
+A standard DRP HSC-RC2 or DC2-test-med-1 workflow includes multiple (around 6?) BPS submissions run as a sequence.
+Definitions of the included Science Pipelines tasks are part of the stack release
+e.g. \url{https://github.com/lsst/obs_subaru/blob/master/pipelines/DRP.yaml}.
+Currently, the submission orchestration is handled manually by humans; the new campaign tooling or tentative campaign prototype should do this to allow automatic submissions.
+
+\subsection{Rubin software stack}
+Weekly stack releases need to be provided.
+
+For execution,
+PanDA should soon be able to use Rubin's official stack docker releases.
+(Not today... but soon hopefully)
+
+For developers, an installation on the filesystem may be needed to allow version mix-and-match. (developer processing is a stretch goal)
+ 
+\subsection{Workflow management system}
+This will use the PanDA system and the PanDA plugin as implemented in the \texttt{ctrl\_bps} package.
+The frontend is part of the Rubin \texttt{lsst\_distrib} software stack.
+
+The PanDA system provides a monitoring page, but customization is needed if this is the only monitoring page.
+
+\subsection{Submission management}
+Automatic tooling does not exist as of today. 
+
+Mechanism to manage bps submissions. This includes tracking tools of submissions.
+The new campaign tooling from DP0.2 may be used here.
+First prototype at SLAC can be a hackaround for a known dataset and workflow without the new campaign tooling.
+
+For automatic submission, the triggering mechanism may be cron jobs on a submission machine, kubernetes cron jobs, Apache Airflow, jenkins-like triggering, GH Action, and so on.
+This may be set up on a regular schedule to generate the parameters and submit to PanDA via BPS. 
+
+Need to be able to easily and accurately track the status of submissions.
+
+\subsection{Policy for output data storage}
+In the short term all are saved.
+Later, a policy to remove old runs is wanted.
+Steve Pietrowicz is developing Butler expiration tooling for the OODS;  it might be applicable here.
+
+\subsection{PanDA DOMA authentication}
+it may be better for DRP to run as a service account that operators can sudo to or otherwise get credentials for, rather than have individual users with their own database and object store accounts/credentials.  This will avoid having releases (which may have parts run by different operators, or no operator at all if triggered by cron) be mishmashes from different users.
+
+PanDA DOMA authorization lasts 24 hours.  Also the access permissions for the area in the repo where the outputs are written.  The service account's umask isn't quite right to allow others in the same group to access those directories.  The current SLAC setup needs adjustments. 
+
+
+\subsection{Profiling (bonus)}
+Jim Chiang’s profiling tools, created for DESC DC2 at NERSC
+
+\subsection{PanDA as a developer service (bonus)}
+Next step,  to allow running workflows with a non-released stack.
+This might need a shared stack on POSIX shared filesystem where all execution nodes can assess.
+Or, use a standard CVMFS \texttt{lsst\_distrib} distribution plus developer's own ticket branch on disk.
+
+
+
+\section{Needs}
+\begin{itemize}
+\item One or two maintainers of the Butler repos. They put together the Butler repos and ensure the readiness and correctness of the Butler repos. Occasional updates to the repos may be needed. Data Curation group?
+\item PanDA setup: SLAC as a PanDA client site. Submission environment.
+PanDA needs to be able to use Rubin's standard weekly stack releases without Sergey building images each time.
+\item submission mechanism. (1) need to be able to submit automatically and programmatically 
+(2) authentication for PanDA 
+\item submission tracking tooling, including status monitoring of a sequence of submissions. The PanDA monitoring page as-is today is not sufficient; developers need to know the relevant overall run status and failures a lot more easily than the current page and developers aren't expected to know PanDA specifics.
+\end{itemize}
+
+
+\section{Smaller test}
+automatic weekly pipeline\_check or ci\_hsc
+Needs a fresh registry every time, and create the repo from scratch.
+
+Currently at NCSA the ci\_hsc is run weekly manually.
